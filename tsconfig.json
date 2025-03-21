@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // Modern JS target compatible with Node.js
+    "module": "commonjs", // Matches "type": "commonjs" in package.json
+    "rootDir": "./src", // Source folder
+    "outDir": "./dist", // Compiled output folder
+    "esModuleInterop": true, // Allows importing CommonJS modules
+    "forceConsistentCasingInFileNames": true,
+    "strict": true, // Enforces strict type checking
+    "skipLibCheck": true, // Speeds up compilation by skipping library checks
+    "lib": ["ES2020"], // Includes ES2020 features (no DOM needed for backend)
+    "moduleResolution": "node", // Node.js-style module resolution
+    "allowJs": true, // Optional: allows JS files if needed
+    "noEmitOnError": true // Prevents emitting JS if there are TS errors
+  },
+  "include": ["src/**/*"], // Include all files in src
+  "exclude": ["node_modules", "dist"] // Exclude node_modules and compiled output
+}
