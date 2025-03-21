@@ -21,19 +21,13 @@ const getTempUserId = (req: Request): string => {
 };
 
 // Step 1: Redirect user to Instagram authorization
-export const connectInstagram = (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const connectInstagram = (req: Request, res: Response) => {
   const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=instagram_basic,instagram_content_publish,instagram_manage_comments,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement&response_type=code`;
 
   res.redirect(authUrl);
 };
 
-export const instagramCallback = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const instagramCallback = async (req: Request, res: Response) => {
   const { code } = req.query;
   console.log("Authorization code received:", code);
 
@@ -202,10 +196,7 @@ export const instagramCallback = async (
 };
 
 // Get user's Instagram account details
-export const getInstagramAccount = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const getInstagramAccount = async (req: Request, res: Response) => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -233,10 +224,7 @@ export const getInstagramAccount = async (
 };
 
 // Get user's Instagram posts
-export const getInstagramPosts = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const getInstagramPosts = async (req: Request, res: Response) => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -284,10 +272,7 @@ export const getInstagramPosts = async (
 };
 
 // Save comment automation settings
-export const saveCommentAutomation = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const saveCommentAutomation = async (req: Request, res: Response) => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -334,8 +319,8 @@ export const saveCommentAutomation = async (
       commentTrigger === "specific" && commentWords
         ? commentWords
             .split(",")
-            .map((word: string) => word.trim())
-            .filter((word: string) => word !== "")
+            .map((word) => word.trim())
+            .filter((word) => word !== "")
         : null;
 
     // Create or update automation settings
@@ -378,10 +363,7 @@ export const saveCommentAutomation = async (
 };
 
 // Get current automation settings
-export const getCommentAutomation = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const getCommentAutomation = async (req: Request, res: Response) => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -482,10 +464,7 @@ export const setupInstagramWebhooks = async (
   }
 };
 
-export const processWebhook = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const processWebhook = async (req: Request, res: Response) => {
   if (req.method === "GET") {
     const verifyToken = WEBHOOK_VERIFY_TOKEN;
     const mode = req.query["hub.mode"];
