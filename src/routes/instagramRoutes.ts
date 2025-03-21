@@ -1,4 +1,3 @@
-// src/routes/instagramRoutes.ts
 import express from "express";
 import {
   connectInstagram,
@@ -9,7 +8,6 @@ import {
   getCommentAutomation,
   processWebhook,
 } from "../controllers/instagramController";
-import { config } from "../config";
 
 const router = express.Router();
 
@@ -17,16 +15,15 @@ const router = express.Router();
 router.get("/connect", connectInstagram);
 router.get("/callback", instagramCallback);
 
-// Account and Post routes (pass userId as query parameter)
+// Account and Post routes
 router.get("/account", getInstagramAccount);
 router.get("/posts", getInstagramPosts);
 
-// Automation routes (pass userId as query parameter)
+// Automation routes
 router.post("/automation", saveCommentAutomation);
 router.get("/automation", getCommentAutomation);
 
 // Webhook endpoint
-router.get("/webhook", processWebhook);
-router.post("/webhook", processWebhook);
+router.all("/webhook", processWebhook);
 
 export default router;

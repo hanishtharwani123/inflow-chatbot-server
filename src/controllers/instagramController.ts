@@ -21,13 +21,16 @@ const getTempUserId = (req: Request): string => {
 };
 
 // Step 1: Redirect user to Instagram authorization
-export const connectInstagram = (req: Request, res: Response) => {
+export const connectInstagram = (req: Request, res: Response): void => {
   const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=instagram_basic,instagram_content_publish,instagram_manage_comments,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement&response_type=code`;
 
   res.redirect(authUrl);
 };
 
-export const instagramCallback = async (req: Request, res: Response) => {
+export const instagramCallback = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { code } = req.query;
   console.log("Authorization code received:", code);
 
@@ -35,7 +38,7 @@ export const instagramCallback = async (req: Request, res: Response) => {
 
   if (!code) {
     console.error("Missing authorization code");
-    return res.redirect(
+    res.redirect(
       `${CLIENT_URL}/connect-platform/instagram?integration=failed&reason=missing_code`
     );
   }
@@ -100,7 +103,7 @@ export const instagramCallback = async (req: Request, res: Response) => {
     const pages = pagesResponse.data.data;
     if (!pages || pages.length === 0) {
       console.error("No Facebook pages found:", pagesResponse.data);
-      return res.redirect(
+      res.redirect(
         `${CLIENT_URL}/connect-platform/instagram?integration=failed&reason=no_facebook_pages`
       );
     }
@@ -153,7 +156,7 @@ export const instagramCallback = async (req: Request, res: Response) => {
 
     if (!instagramAccountId) {
       console.error("No Instagram Business account found");
-      return res.redirect(
+      res.redirect(
         `${CLIENT_URL}/connect-platform/instagram?integration=failed&reason=no_instagram_account`
       );
     }
@@ -180,7 +183,7 @@ export const instagramCallback = async (req: Request, res: Response) => {
 
     // Step 8: Redirect to success
     console.log(`Successfully connected Instagram account: ${username}`);
-    return res.redirect(`${CLIENT_URL}/success/instagram?username=${username}`);
+    res.redirect(`${CLIENT_URL}/success/instagram?username=${username}`);
   } catch (error: any) {
     console.error(
       "Instagram auth error:",
@@ -189,18 +192,21 @@ export const instagramCallback = async (req: Request, res: Response) => {
     const errorReason = error.response?.data?.error?.message
       ? encodeURIComponent(error.response.data.error.message)
       : "unknown_error";
-    return res.redirect(
+    res.redirect(
       `${CLIENT_URL}/connect-platform/instagram?integration=failed&reason=${errorReason}`
     );
   }
 };
 
 // Get user's Instagram account details
-export const getInstagramAccount = async (req: Request, res: Response) => {
+export const getInstagramAccount = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
-    return res.status(401).json({ error: "User not authenticated" });
+    res.status(401).json({ error: "User not authenticated" });
   }
 
   try {
@@ -210,25 +216,28 @@ export const getInstagramAccount = async (req: Request, res: Response) => {
     });
 
     if (!integration) {
-      return res.status(404).json({ error: "Instagram account not connected" });
+      res.status(404).json({ error: "Instagram account not connected" });
     }
 
-    return res.json({
+    res.json({
       username: integration.username,
       profilePicture: integration.profilePicture,
     });
   } catch (error) {
     console.error("Error fetching Instagram account:", error);
-    return res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 // Get user's Instagram posts
-export const getInstagramPosts = async (req: Request, res: Response) => {
+export const getInstagramPosts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
-    return res.status(401).json({ error: "User not authenticated" });
+    res.status(401).json({ error: "User not authenticated" });
   }
 
   try {
@@ -239,7 +248,7 @@ export const getInstagramPosts = async (req: Request, res: Response) => {
     console.log("integration: ", integration);
 
     if (!integration) {
-      return res.status(404).json({ error: "Instagram account not connected" });
+      res.status(404).json({ error: "Instagram account not connected" });
     }
 
     // Use 'accountId' instead of 'instagramAccountId'
@@ -261,22 +270,25 @@ export const getInstagramPosts = async (req: Request, res: Response) => {
     const posts = response.data.data || [];
     console.log("posts :", posts);
 
-    return res.json({ posts });
+    res.json({ posts });
   } catch (error: any) {
     console.error(
       "Error fetching Instagram posts:",
       error.response?.data || error.message
     );
-    return res.status(500).json({ error: "Failed to fetch Instagram posts" });
+    res.status(500).json({ error: "Failed to fetch Instagram posts" });
   }
 };
 
 // Save comment automation settings
-export const saveCommentAutomation = async (req: Request, res: Response) => {
+export const saveCommentAutomation = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
-    return res.status(401).json({ error: "User not authenticated" });
+    res.status(401).json({ error: "User not authenticated" });
   }
 
   try {
@@ -298,12 +310,12 @@ export const saveCommentAutomation = async (req: Request, res: Response) => {
 
     // Validate required fields
     if (!postType || !commentTrigger || !openingDM) {
-      return res.status(400).json({ error: "Missing required fields" });
+      res.status(400).json({ error: "Missing required fields" });
     }
 
     // If postType is specific, ensure a post is selected
     if (postType === "specific" && !selectedPost) {
-      return res.status(400).json({ error: "Please select a post" });
+      res.status(400).json({ error: "Please select a post" });
     }
 
     // If commentTrigger is specific, ensure words are provided
@@ -311,7 +323,7 @@ export const saveCommentAutomation = async (req: Request, res: Response) => {
       commentTrigger === "specific" &&
       (!commentWords || commentWords.trim() === "")
     ) {
-      return res.status(400).json({ error: "Please provide trigger words" });
+      res.status(400).json({ error: "Please provide trigger words" });
     }
 
     // Process trigger words if provided
@@ -350,39 +362,38 @@ export const saveCommentAutomation = async (req: Request, res: Response) => {
       await setupCommentWebhookHandler(userId);
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Comment automation saved successfully",
       automation,
     });
   } catch (error: any) {
     console.error("Error saving comment automation:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to save automation settings" });
+    res.status(500).json({ error: "Failed to save automation settings" });
   }
 };
 
 // Get current automation settings
-export const getCommentAutomation = async (req: Request, res: Response) => {
+export const getCommentAutomation = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
-    return res.status(401).json({ error: "User not authenticated" });
+    res.status(401).json({ error: "User not authenticated" });
   }
 
   try {
     const automation = await CommentAutomation.findOne({ userId });
     console.log("automation :", automation);
     if (!automation) {
-      return res.status(404).json({ error: "No automation settings found" });
+      res.status(404).json({ error: "No automation settings found" });
     }
 
-    return res.json({ automation });
+    res.json({ automation });
   } catch (error) {
     console.error("Error fetching automation settings:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to fetch automation settings" });
+    res.status(500).json({ error: "Failed to fetch automation settings" });
   }
 };
 
@@ -464,7 +475,10 @@ export const setupInstagramWebhooks = async (
   }
 };
 
-export const processWebhook = async (req: Request, res: Response) => {
+export const processWebhook = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   if (req.method === "GET") {
     const verifyToken = WEBHOOK_VERIFY_TOKEN;
     const mode = req.query["hub.mode"];
@@ -473,10 +487,10 @@ export const processWebhook = async (req: Request, res: Response) => {
 
     if (mode === "subscribe" && token === verifyToken) {
       console.log("Webhook verified");
-      return res.status(200).send(challenge);
+      res.status(200).send(challenge);
     } else {
       console.error("Webhook verification failed");
-      return res.sendStatus(403);
+      res.sendStatus(403);
     }
   }
 
@@ -487,7 +501,7 @@ export const processWebhook = async (req: Request, res: Response) => {
 
     if (!object || !entry) {
       console.error("Invalid payload: missing object or entry");
-      return res.sendStatus(400);
+      res.sendStatus(400);
     }
 
     if (object === "instagram") {
@@ -512,10 +526,10 @@ export const processWebhook = async (req: Request, res: Response) => {
     } else {
       console.log(`Ignoring non-Instagram webhook: ${object}`);
     }
-    return res.sendStatus(200);
+    res.sendStatus(200);
   }
 
-  return res.sendStatus(405);
+  res.sendStatus(405);
 };
 
 const handleCommentEvent = async (commentData: any) => {
