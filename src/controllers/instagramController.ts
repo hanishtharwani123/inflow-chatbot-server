@@ -319,8 +319,8 @@ export const saveCommentAutomation = async (req: Request, res: Response) => {
       commentTrigger === "specific" && commentWords
         ? commentWords
             .split(",")
-            .map((word) => word.trim())
-            .filter((word) => word !== "")
+            .map((word: string) => word.trim())
+            .filter((word: string) => word !== "")
         : null;
 
     // Create or update automation settings
