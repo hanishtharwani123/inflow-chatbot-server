@@ -12,6 +12,7 @@ const FB_APP_SECRET = config.FB_APP_SECRET;
 const REDIRECT_URI = config.REDIRECT_URI; // e.g., http://localhost:3000/api/instagram/callback
 const CLIENT_URL = config.CLIENT_URL; // e.g., http://localhost:5173
 const FB_API_VERSION = "v22.0";
+const WEBHOOK_VERIFY_TOKEN = config.WEBHOOK_VERIFY_TOKEN;
 
 // Add this temporary auth middleware replacement since you mentioned no auth is needed yet
 const getTempUserId = (req: Request): string => {
@@ -20,13 +21,19 @@ const getTempUserId = (req: Request): string => {
 };
 
 // Step 1: Redirect user to Instagram authorization
-export const connectInstagram = (req: Request, res: Response) => {
+export const connectInstagram = (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${REDIRECT_URI}&scope=instagram_basic,instagram_content_publish,instagram_manage_comments,instagram_manage_messages,pages_messaging,pages_show_list,pages_manage_metadata,pages_read_engagement&response_type=code`;
 
   res.redirect(authUrl);
 };
 
-export const instagramCallback = async (req: Request, res: Response) => {
+export const instagramCallback = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { code } = req.query;
   console.log("Authorization code received:", code);
 
@@ -195,7 +202,10 @@ export const instagramCallback = async (req: Request, res: Response) => {
 };
 
 // Get user's Instagram account details
-export const getInstagramAccount = async (req: Request, res: Response) => {
+export const getInstagramAccount = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -223,7 +233,10 @@ export const getInstagramAccount = async (req: Request, res: Response) => {
 };
 
 // Get user's Instagram posts
-export const getInstagramPosts = async (req: Request, res: Response) => {
+export const getInstagramPosts = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -271,7 +284,10 @@ export const getInstagramPosts = async (req: Request, res: Response) => {
 };
 
 // Save comment automation settings
-export const saveCommentAutomation = async (req: Request, res: Response) => {
+export const saveCommentAutomation = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -318,8 +334,8 @@ export const saveCommentAutomation = async (req: Request, res: Response) => {
       commentTrigger === "specific" && commentWords
         ? commentWords
             .split(",")
-            .map((word) => word.trim())
-            .filter((word) => word !== "")
+            .map((word: string) => word.trim())
+            .filter((word: string) => word !== "")
         : null;
 
     // Create or update automation settings
@@ -362,7 +378,10 @@ export const saveCommentAutomation = async (req: Request, res: Response) => {
 };
 
 // Get current automation settings
-export const getCommentAutomation = async (req: Request, res: Response) => {
+export const getCommentAutomation = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const userId = getTempUserId(req);
 
   if (!userId) {
@@ -463,7 +482,10 @@ export const setupInstagramWebhooks = async (
   }
 };
 
-export const processWebhook = async (req: Request, res: Response) => {
+export const processWebhook = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   if (req.method === "GET") {
     const verifyToken = WEBHOOK_VERIFY_TOKEN;
     const mode = req.query["hub.mode"];
